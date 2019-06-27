@@ -33,7 +33,7 @@ public interface ChallengeApi {
     @RequestMapping(value = "/challenge/findByCategory",
         produces = { "application/json" }, 
         method = RequestMethod.GET)
-    ResponseEntity<List<Challenge>> findChallengeByCategory(@NotNull @ApiParam(value = "Status values that need to be considered for filter", required = true, allowableValues = "beginner, intermediate, advanced") @Valid @RequestParam(value = "category", required = true) List<String> category);
+    ResponseEntity<List<Challenge>> findChallengeByCategory(@NotNull @ApiParam(value = "Status values that need to be considered for filter", required = true, allowableValues = "beginner, intermediate, advanced") @Valid @RequestParam(value = "category", required = true) String category);
 
 
     @ApiOperation(value = "Finds Challenge by title", nickname = "findChallengeByTitle", notes = "", response = Challenge.class, responseContainer = "List", tags={ "challenge", })

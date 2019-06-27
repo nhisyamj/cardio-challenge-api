@@ -7,6 +7,8 @@ import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import io.swagger.model.Category;
 import org.springframework.validation.annotation.Validated;
+
+import javax.persistence.*;
 import javax.validation.Valid;
 import javax.validation.constraints.*;
 
@@ -16,13 +18,21 @@ import javax.validation.constraints.*;
 @Validated
 @javax.annotation.Generated(value = "io.swagger.codegen.languages.SpringCodegen", date = "2019-06-26T16:01:14.232Z")
 
+@Entity
+@Table(name = "challenge")
 public class Challenge   {
+  @Id
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
+  @Column(name = "id")
   @JsonProperty("id")
   private Long id = null;
 
+  @Column(name = "title")
   @JsonProperty("title")
   private String title = null;
 
+  @OneToOne
+  @JoinColumn(name = "category")
   @JsonProperty("category")
   private Category category = null;
 

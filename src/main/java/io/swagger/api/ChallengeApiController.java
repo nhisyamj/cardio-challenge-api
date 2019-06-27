@@ -1,8 +1,11 @@
 package io.swagger.api;
 
+import io.swagger.model.Category;
 import io.swagger.model.Challenge;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.swagger.annotations.*;
+import io.swagger.repository.CategoryRepository;
+import io.swagger.repository.ChallengeRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
@@ -31,20 +34,28 @@ public class ChallengeApiController implements ChallengeApi {
 
     private final HttpServletRequest request;
 
+    private final ChallengeRepository challengeRepository;
+
+    private final CategoryRepository categoryRepository;
+
     @org.springframework.beans.factory.annotation.Autowired
-    public ChallengeApiController(ObjectMapper objectMapper, HttpServletRequest request) {
+    public ChallengeApiController(ObjectMapper objectMapper, HttpServletRequest request, ChallengeRepository challengeRepository, CategoryRepository categoryRepository) {
         this.objectMapper = objectMapper;
         this.request = request;
+        this.challengeRepository = challengeRepository;
+        this.categoryRepository = categoryRepository;
     }
 
-    public ResponseEntity<List<Challenge>> findChallengeByCategory(@NotNull @ApiParam(value = "Status values that need to be considered for filter", required = true, allowableValues = "beginner, intermediate, advanced") @Valid @RequestParam(value = "category", required = true) List<String> category) {
+    public ResponseEntity<List<Challenge>> findChallengeByCategory(@NotNull @ApiParam(value = "Status values that need to be considered for filter", required = true, allowableValues = "beginner, intermediate, advanced") @Valid @RequestParam(value = "category", required = true) String category) {
         String accept = request.getHeader("Accept");
         ResponseEntity responseEntity = new ResponseEntity(HttpStatus.NOT_ACCEPTABLE);
         if (accept != null && accept.contains("application/json")) {
             try {
-                responseEntity = new ResponseEntity<List<Challenge>>(objectMapper.readValue("[ {  \"id\" : 1,  \"title\" : \"title\",  \"category\" : {    \"name\" : \"name\",    \"id\" : 6  }}, {  \"id\" : 0,  \"title\" : \"title\",  \"category\" : {    \"name\" : \"name\",    \"id\" : 6  }} ]", List.class), HttpStatus.OK);
-            } catch (IOException e) {
-                log.error("Couldn't serialize response for content type application/json", e);
+                Category category1 = categoryRepository.findByName(category);
+                List<Challenge> challenges = challengeRepository.findAllByCategory(category1);
+                responseEntity = new ResponseEntity<List<Challenge>>(challenges, HttpStatus.OK);
+            } catch (Exception e) {
+                log.error("Error", e);
                 responseEntity = new ResponseEntity<List<Challenge>>(HttpStatus.INTERNAL_SERVER_ERROR);
             }
         }
@@ -57,9 +68,10 @@ public class ChallengeApiController implements ChallengeApi {
         ResponseEntity responseEntity = new ResponseEntity(HttpStatus.NOT_ACCEPTABLE);
         if (accept != null && accept.contains("application/json")) {
             try {
-                responseEntity = new ResponseEntity<List<Challenge>>(objectMapper.readValue("[ {  \"id\" : 0,  \"title\" : \"title\",  \"category\" : {    \"name\" : \"name\",    \"id\" : 6  }}, {  \"id\" : 0,  \"title\" : \"title\",  \"category\" : {    \"name\" : \"name\",    \"id\" : 6  }} ]", List.class), HttpStatus.NOT_IMPLEMENTED);
-            } catch (IOException e) {
-                log.error("Couldn't serialize response for content type application/json", e);
+                List<Challenge> challenges = challengeRepository.findAllByTitleLike(title);
+                responseEntity = new ResponseEntity<List<Challenge>>(challenges, HttpStatus.OK);
+            } catch (Exception e) {
+                log.error("Error", e);
                 responseEntity = new ResponseEntity<List<Challenge>>(HttpStatus.INTERNAL_SERVER_ERROR);
             }
         }
